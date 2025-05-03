@@ -15,7 +15,7 @@ const sleepTime = time.Second * 2
 
 func (s *GophermartService) GetAccrual(orderNumber string) (*models.AccrualExternal, error) {
 	var accrual models.AccrualExternal
-	url := fmt.Sprintf("%s%s%s", s.Cfg.AccrualAddr, "/api/user/orders/", orderNumber)
+	url := fmt.Sprintf("%s%s%s", s.Cfg.AccrualAddr, "/api/orders/", orderNumber)
 	resp, err := http.Get(url)
 	if err != nil {
 		slog.Error("GetAccrual request to accrual service failed ", slog.Any("err", err))
