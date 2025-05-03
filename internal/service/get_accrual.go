@@ -19,7 +19,7 @@ func (s *GophermartService) GetAccrual(orderNumber string) (*models.AccrualExter
 	resp, err := http.Get(url)
 	if err != nil {
 		slog.Error("GetAccrual request to accrual service failed ", slog.Any("err", err))
-		return nil, fmt.Errorf("get request to acrual failed: %w", err)
+		return nil, fmt.Errorf("get request to accrual failed: %w", err)
 	}
 	defer resp.Body.Close()
 

@@ -20,6 +20,7 @@ func (h *HTTPHandler) GetUserOrders(w http.ResponseWriter, r *http.Request) {
 			return
 
 		case errors.Is(err, internalErrors.ErrNoUserIDFound):
+			slog.Error("GetUserOrders user ID not resolved", slog.Any("error", err))
 			http.Error(w, "User ID not found", http.StatusUnauthorized)
 			return
 
