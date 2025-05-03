@@ -45,7 +45,7 @@ func InitConfig() *Config {
 
 	accrualAddr := os.Getenv("ACCRUAL_SYSTEM_ADDRESS")
 	if accrualAddr != "" {
-		cfg.AccrualAddr = accrualAddr
+		cfg.AccrualAddr = "http://" + accrualAddr
 	}
 
 	// Инициализация переменных по умолчанию

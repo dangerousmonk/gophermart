@@ -40,7 +40,7 @@ func (s *GophermartService) GetAccrual(orderNumber string) (*models.AccrualExter
 		}
 		return s.GetAccrual(orderNumber)
 	default:
-		slog.Error("GetAccrual server returned unexpected status ", slog.Any("err", err))
+		slog.Error("GetAccrual server returned unexpected status", slog.Int("statusCode", resp.StatusCode), slog.String("URL", url))
 		return nil, fmt.Errorf("accrual server error: %s", resp.Status)
 	}
 }
