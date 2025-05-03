@@ -11,7 +11,7 @@ import (
 	"github.com/dangerousmonk/gophermart/internal/models"
 )
 
-const sleepTime = time.Second * 10
+const sleepTime = time.Second * 2
 
 func (s *GophermartService) GetAccrual(orderNumber string) (*models.AccrualExternal, error) {
 	var accrual models.AccrualExternal
@@ -30,6 +30,7 @@ func (s *GophermartService) GetAccrual(orderNumber string) (*models.AccrualExter
 		}
 		return &accrual, nil
 	case http.StatusNoContent:
+		slog.Info("GetAccrual order not registered in system ", slog.String("orderNumber", orderNumber))
 		return nil, nil
 	case http.StatusTooManyRequests:
 		timeSleep, err := strconv.Atoi(resp.Header.Get("Retry-After"))
