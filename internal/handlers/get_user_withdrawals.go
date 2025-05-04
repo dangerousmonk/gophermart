@@ -21,11 +21,13 @@ func (h *HTTPHandler) GetUserWithdrawals(w http.ResponseWriter, r *http.Request)
 
 		case errors.Is(err, service.ErrNoUserIDFound):
 			http.Error(w, "User ID not found", http.StatusUnauthorized)
+			WriteErrorResponse(w, http.StatusUnauthorized, err.Error())
 			return
 
 		default:
 			slog.Error("GetUserWithdrawals error", slog.Any("error", err))
 			http.Error(w, err.Error(), http.StatusInternalServerError)
+			WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 	} else {
@@ -33,7 +35,7 @@ func (h *HTTPHandler) GetUserWithdrawals(w http.ResponseWriter, r *http.Request)
 		w.WriteHeader(http.StatusOK)
 		if err := json.NewEncoder(w).Encode(wds); err != nil {
 			slog.Error("GetUserWithdrawals error on encoding response", slog.Any("error", err))
-			http.Error(w, `{"error":" failed, to encode response"}`, http.StatusInternalServerError)
+			WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 		return

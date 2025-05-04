@@ -7,9 +7,10 @@ import (
 
 	"github.com/dangerousmonk/gophermart/cmd/config"
 	"github.com/dangerousmonk/gophermart/internal/handlers"
-	appMiddleware "github.com/dangerousmonk/gophermart/internal/middleware"
+	appmdwlr "github.com/dangerousmonk/gophermart/internal/middleware"
 	"github.com/dangerousmonk/gophermart/internal/service"
 	"github.com/dangerousmonk/gophermart/internal/utils"
+	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -46,7 +47,8 @@ func (app *GophermartApp) initRouter() *chi.Mux {
 	}
 
 	// middleware
-	r.Use(appMiddleware.RequestSlogger)
+	r.Use(middleware.Recoverer)
+	r.Use(appmdwlr.RequestSlogger)
 
 	// handlers
 	httpHandler := handlers.NewHandler(*app.Service, jwtAuthenticator)
@@ -55,7 +57,7 @@ func (app *GophermartApp) initRouter() *chi.Mux {
 	r.Post("/api/user/login", httpHandler.LoginUser)
 
 	r.Group(func(r chi.Router) {
-		r.Use(appMiddleware.AuthMiddleware(jwtAuthenticator))
+		r.Use(appmdwlr.AuthMiddleware(jwtAuthenticator))
 		r.Post("/api/user/orders", httpHandler.UploadOrder)
 		r.Get("/api/user/orders", httpHandler.GetUserOrders)
 		r.Get("/api/user/withdrawals", httpHandler.GetUserWithdrawals)

@@ -14,7 +14,7 @@ func (h *HTTPHandler) MakeWithdrawal(w http.ResponseWriter, r *http.Request) {
 	var req models.MakeWithdrawalReq
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		slog.Error("MakeWithdrawal error on decoding body", slog.Any("err", err))
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 	_, err := h.service.MakeWithdrawal(r.Context(), req)
@@ -22,23 +22,23 @@ func (h *HTTPHandler) MakeWithdrawal(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, service.ErrWrongOrderNum):
-			http.Error(w, "Invalid order number", http.StatusUnprocessableEntity)
+			WriteErrorResponse(w, http.StatusUnprocessableEntity, err.Error())
 			return
 		case errors.Is(err, service.ErrNoUserIDFound):
-			http.Error(w, "User ID not found", http.StatusUnauthorized)
+			WriteErrorResponse(w, http.StatusUnauthorized, err.Error())
 			return
 
 		case errors.Is(err, service.ErrWithdrawalForOrderExists):
-			http.Error(w, "Withdrawal for this order already registered", http.StatusConflict)
+			WriteErrorResponse(w, http.StatusConflict, err.Error())
 			return
 
 		case errors.Is(err, service.ErrInsufficientBalance):
-			http.Error(w, err.Error(), http.StatusPaymentRequired)
+			WriteErrorResponse(w, http.StatusPaymentRequired, err.Error())
 			return
 
 		default:
 			slog.Error("CreateWithdrawal error", slog.Any("error", err))
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 	} else {

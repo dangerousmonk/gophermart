@@ -21,12 +21,12 @@ func (h *HTTPHandler) GetUserOrders(w http.ResponseWriter, r *http.Request) {
 
 		case errors.Is(err, service.ErrNoUserIDFound):
 			slog.Error("GetUserOrders user ID not resolved", slog.Any("error", err))
-			http.Error(w, "User ID not found", http.StatusUnauthorized)
+			WriteErrorResponse(w, http.StatusUnauthorized, err.Error())
 			return
 
 		default:
 			slog.Error("GetUserOrders error", slog.Any("error", err))
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 	} else {
@@ -34,7 +34,7 @@ func (h *HTTPHandler) GetUserOrders(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		if err := json.NewEncoder(w).Encode(orders); err != nil {
 			slog.Error("GetUserOrders error on encoding response", slog.Any("error", err))
-			http.Error(w, `{"error":" failed, to encode response"}`, http.StatusInternalServerError)
+			WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 		return

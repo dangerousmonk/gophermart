@@ -16,12 +16,12 @@ func (h *HTTPHandler) GetBalance(w http.ResponseWriter, r *http.Request) {
 		switch {
 
 		case errors.Is(err, service.ErrNoUserIDFound):
-			http.Error(w, "User ID not found", http.StatusUnauthorized)
+			WriteErrorResponse(w, http.StatusUnauthorized, err.Error())
 			return
 
 		default:
 			slog.Error("GetBalance error", slog.Any("error", err))
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 	} else {
@@ -29,7 +29,7 @@ func (h *HTTPHandler) GetBalance(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		if err := json.NewEncoder(w).Encode(ub); err != nil {
 			slog.Error("GetUserWithdrawals error on encoding response", slog.Any("error", err))
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 		return

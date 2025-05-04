@@ -15,33 +15,33 @@ func (h *HTTPHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	var req models.CreateUserReq
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		slog.Error("RegisterUser error on decoding body", slog.Any("error", err))
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	userID, err := h.service.RegisterUser(r.Context(), &req)
 	if err != nil {
-		slog.Error("Error on creating user", slog.Any("error", err))
+		slog.Error("RegisterUser error on creating user", slog.Any("error", err))
 		var validateErrs validator.ValidationErrors
 
 		switch {
 		case errors.Is(err, service.ErrLoginExists):
-			http.Error(w, err.Error(), http.StatusConflict)
+			WriteErrorResponse(w, http.StatusConflict, err.Error())
 			return
 
 		case errors.As(err, &validateErrs):
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
 
 		default:
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 	}
 	err = h.authenticator.SetAuth(userID, w, r)
 	if err != nil {
-		slog.Error("Error on setting cookies", slog.Any("error", err))
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		slog.Error("RegisterUser error on setting cookies", slog.Any("error", err))
+		WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")

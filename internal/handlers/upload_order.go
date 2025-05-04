@@ -13,8 +13,8 @@ import (
 func (h *HTTPHandler) UploadOrder(w http.ResponseWriter, r *http.Request) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		slog.Error("UploadOrder error", slog.Any("error", err))
-		http.Error(w, "Error on decoding body", http.StatusBadRequest)
+		slog.Error("UploadOrder error on decoding body", slog.Any("error", err))
+		WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -24,10 +24,10 @@ func (h *HTTPHandler) UploadOrder(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, service.ErrWrongOrderNum):
-			http.Error(w, "Invalid order number", http.StatusUnprocessableEntity)
+			WriteErrorResponse(w, http.StatusUnprocessableEntity, err.Error())
 			return
 		case errors.Is(err, service.ErrNoUserIDFound):
-			http.Error(w, "User ID not found", http.StatusUnauthorized)
+			WriteErrorResponse(w, http.StatusUnauthorized, err.Error())
 			return
 
 		case errors.Is(err, service.ErrOrderExists):
@@ -36,12 +36,12 @@ func (h *HTTPHandler) UploadOrder(w http.ResponseWriter, r *http.Request) {
 			return
 
 		case errors.Is(err, service.ErrOrderExistsAnotherUser):
-			http.Error(w, "Order uploaded by another user", http.StatusConflict)
+			WriteErrorResponse(w, http.StatusConflict, err.Error())
 			return
 
 		default:
 			slog.Error("UploadOrder error", slog.Any("error", err))
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 	} else {

@@ -14,7 +14,7 @@ func (h *HTTPHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 	var req models.CreateUserReq
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		slog.Error("LoginUser error on decoding body", slog.Any("err", err))
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -24,25 +24,26 @@ func (h *HTTPHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 
 		switch {
 		case errors.Is(err, service.ErrWrongPassword) || errors.Is(err, service.ErrNoUserFound):
-			http.Error(w, err.Error(), http.StatusUnauthorized)
+			WriteErrorResponse(w, http.StatusUnauthorized, err.Error())
 			return
 
 		default:
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 	}
 	err = h.authenticator.SetAuth(user.ID, w, r)
 	if err != nil {
-		slog.Error("Error on setting cookies", slog.Any("error", err))
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		slog.Error("LoginUser error on setting cookies", slog.Any("error", err))
+		WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 
 	if err := json.NewEncoder(w).Encode(user); err != nil {
-		http.Error(w, "Error on encoding response", http.StatusInternalServerError)
+		slog.Error("LoginUser error on encoding response", slog.Any("error", err))
+		WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 	w.WriteHeader(http.StatusOK)
