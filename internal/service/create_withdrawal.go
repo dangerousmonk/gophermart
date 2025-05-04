@@ -4,7 +4,6 @@ import (
 	"context"
 	"log/slog"
 
-	appErrors "github.com/dangerousmonk/gophermart/internal/errors"
 	"github.com/dangerousmonk/gophermart/internal/middleware"
 	"github.com/dangerousmonk/gophermart/internal/models"
 	"github.com/dangerousmonk/gophermart/internal/utils"
@@ -23,19 +22,19 @@ func (s *GophermartService) MakeWithdrawal(ctx context.Context, wdReq models.Mak
 
 	if !utils.IsValidOrderNumber(wdReq.Order) {
 		slog.Error("CreateWithdrawal not valid order number", slog.Any("error", wdReq.Order))
-		return wd, appErrors.ErrWrongOrderNum
+		return wd, ErrWrongOrderNum
 	}
 
 	id := ctx.Value(middleware.UserIDContextKey)
 	if id == nil {
 		slog.Error("CreateWithdrawal no userID in context", slog.Any("error", id))
-		return wd, appErrors.ErrNoUserIDFound
+		return wd, ErrNoUserIDFound
 	}
 
 	userID, ok := id.(int)
 	if !ok {
 		slog.Error("CreateWithdrawal failed to cast userID", slog.Any("error", id))
-		return wd, appErrors.ErrNoUserIDFound
+		return wd, ErrNoUserIDFound
 	}
 
 	balance, err := s.Repo.GetBalance(ctx, userID)
@@ -45,13 +44,13 @@ func (s *GophermartService) MakeWithdrawal(ctx context.Context, wdReq models.Mak
 	}
 	if balance.Current < wdReq.Sum {
 		slog.Error("CreateWithdrawal insufficient funds", slog.Any("error", id))
-		return wd, appErrors.ErrInsufficientBalance
+		return wd, ErrInsufficientBalance
 	}
 
 	err = s.Repo.WithdrawFromBalance(ctx, wdReq.Order, userID, wdReq.Sum)
 	if err != nil {
 		if s.Repo.IsUniqueViolation(err, "withdrawals_order_number_key") {
-			return wd, appErrors.ErrWithdrawalForOrderExists
+			return wd, ErrWithdrawalForOrderExists
 		}
 		return wd, err
 	}

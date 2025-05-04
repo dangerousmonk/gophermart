@@ -6,7 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 
-	internalErrors "github.com/dangerousmonk/gophermart/internal/errors"
+	"github.com/dangerousmonk/gophermart/internal/service"
 )
 
 func (h *HTTPHandler) GetUserOrders(w http.ResponseWriter, r *http.Request) {
@@ -14,12 +14,12 @@ func (h *HTTPHandler) GetUserOrders(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		switch {
-		case errors.Is(err, internalErrors.ErrNoOrders):
+		case errors.Is(err, service.ErrNoOrders):
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusNoContent)
 			return
 
-		case errors.Is(err, internalErrors.ErrNoUserIDFound):
+		case errors.Is(err, service.ErrNoUserIDFound):
 			slog.Error("GetUserOrders user ID not resolved", slog.Any("error", err))
 			http.Error(w, "User ID not found", http.StatusUnauthorized)
 			return

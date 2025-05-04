@@ -6,7 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 
-	appErrors "github.com/dangerousmonk/gophermart/internal/errors"
+	"github.com/dangerousmonk/gophermart/internal/service"
 )
 
 func (h *HTTPHandler) GetBalance(w http.ResponseWriter, r *http.Request) {
@@ -15,7 +15,7 @@ func (h *HTTPHandler) GetBalance(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch {
 
-		case errors.Is(err, appErrors.ErrNoUserIDFound):
+		case errors.Is(err, service.ErrNoUserIDFound):
 			http.Error(w, "User ID not found", http.StatusUnauthorized)
 			return
 

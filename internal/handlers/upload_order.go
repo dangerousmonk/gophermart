@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strings"
 
-	appErrors "github.com/dangerousmonk/gophermart/internal/errors"
+	"github.com/dangerousmonk/gophermart/internal/service"
 )
 
 func (h *HTTPHandler) UploadOrder(w http.ResponseWriter, r *http.Request) {
@@ -23,19 +23,19 @@ func (h *HTTPHandler) UploadOrder(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		switch {
-		case errors.Is(err, appErrors.ErrWrongOrderNum):
+		case errors.Is(err, service.ErrWrongOrderNum):
 			http.Error(w, "Invalid order number", http.StatusUnprocessableEntity)
 			return
-		case errors.Is(err, appErrors.ErrNoUserIDFound):
+		case errors.Is(err, service.ErrNoUserIDFound):
 			http.Error(w, "User ID not found", http.StatusUnauthorized)
 			return
 
-		case errors.Is(err, appErrors.ErrOrderExists):
+		case errors.Is(err, service.ErrOrderExists):
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
 			return
 
-		case errors.Is(err, appErrors.ErrOrderExistsAnotherUser):
+		case errors.Is(err, service.ErrOrderExistsAnotherUser):
 			http.Error(w, "Order uploaded by another user", http.StatusConflict)
 			return
 

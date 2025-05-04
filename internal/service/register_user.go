@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 
-	internalErrors "github.com/dangerousmonk/gophermart/internal/errors"
 	"github.com/dangerousmonk/gophermart/internal/models"
 	"github.com/dangerousmonk/gophermart/internal/utils"
 	"github.com/go-playground/validator/v10"
@@ -26,7 +25,7 @@ func (s *GophermartService) RegisterUser(ctx context.Context, req *models.Create
 	userID, err := s.Repo.CreateUser(ctx, req)
 	if err != nil {
 		if s.Repo.IsUniqueViolation(err, "users_login_key") {
-			return -1, internalErrors.ErrLoginExists
+			return -1, ErrLoginExists
 		}
 		return -1, err
 	}

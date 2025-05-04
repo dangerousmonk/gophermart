@@ -1,4 +1,4 @@
-package errors
+package service
 
 import "errors"
 
@@ -20,6 +20,4 @@ var (
 	ErrNoWithdrawals            = errors.New("withdrawals: no withdrawals found for user")
 	ErrWithdrawalForOrderExists = errors.New("withdrawal: for this order already registered")
 	ErrInsufficientBalance      = errors.New("withdrawal: insufficient funds on balance")
-
-	ErrValidationFailed = errors.New("validation: failed to validate request body")
 )

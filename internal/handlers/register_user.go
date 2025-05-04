@@ -6,8 +6,8 @@ import (
 	"log/slog"
 	"net/http"
 
-	internalErrors "github.com/dangerousmonk/gophermart/internal/errors"
 	"github.com/dangerousmonk/gophermart/internal/models"
+	"github.com/dangerousmonk/gophermart/internal/service"
 	"github.com/go-playground/validator/v10"
 )
 
@@ -25,7 +25,7 @@ func (h *HTTPHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 		var validateErrs validator.ValidationErrors
 
 		switch {
-		case errors.Is(err, internalErrors.ErrLoginExists):
+		case errors.Is(err, service.ErrLoginExists):
 			http.Error(w, err.Error(), http.StatusConflict)
 			return
 

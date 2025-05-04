@@ -4,7 +4,6 @@ import (
 	"context"
 	"log/slog"
 
-	appErrors "github.com/dangerousmonk/gophermart/internal/errors"
 	"github.com/dangerousmonk/gophermart/internal/middleware"
 	"github.com/dangerousmonk/gophermart/internal/models"
 )
@@ -13,13 +12,13 @@ func (s *GophermartService) GetUserWithdrawals(ctx context.Context) ([]models.Wi
 	id := ctx.Value(middleware.UserIDContextKey)
 	if id == nil {
 		slog.Error("GetUserWithdrawals no userID in context", slog.Any("error", id))
-		return nil, appErrors.ErrNoUserIDFound
+		return nil, ErrNoUserIDFound
 	}
 
 	userID, ok := id.(int)
 	if !ok {
 		slog.Error("GetUserWithdrawals failed to cast userID", slog.Any("error", id))
-		return nil, appErrors.ErrNoUserIDFound
+		return nil, ErrNoUserIDFound
 	}
 
 	wds, err := s.Repo.GetUserWithdrawals(ctx, userID)
@@ -28,7 +27,7 @@ func (s *GophermartService) GetUserWithdrawals(ctx context.Context) ([]models.Wi
 		return nil, err
 	}
 	if len(wds) == 0 {
-		return nil, appErrors.ErrNoWithdrawals
+		return nil, ErrNoWithdrawals
 	}
 	return wds, nil
 }

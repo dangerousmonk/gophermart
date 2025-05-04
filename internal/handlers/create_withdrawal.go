@@ -6,8 +6,8 @@ import (
 	"log/slog"
 	"net/http"
 
-	internalErrors "github.com/dangerousmonk/gophermart/internal/errors"
 	"github.com/dangerousmonk/gophermart/internal/models"
+	"github.com/dangerousmonk/gophermart/internal/service"
 )
 
 func (h *HTTPHandler) MakeWithdrawal(w http.ResponseWriter, r *http.Request) {
@@ -21,18 +21,18 @@ func (h *HTTPHandler) MakeWithdrawal(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		switch {
-		case errors.Is(err, internalErrors.ErrWrongOrderNum):
+		case errors.Is(err, service.ErrWrongOrderNum):
 			http.Error(w, "Invalid order number", http.StatusUnprocessableEntity)
 			return
-		case errors.Is(err, internalErrors.ErrNoUserIDFound):
+		case errors.Is(err, service.ErrNoUserIDFound):
 			http.Error(w, "User ID not found", http.StatusUnauthorized)
 			return
 
-		case errors.Is(err, internalErrors.ErrWithdrawalForOrderExists):
+		case errors.Is(err, service.ErrWithdrawalForOrderExists):
 			http.Error(w, "Withdrawal for this order already registered", http.StatusConflict)
 			return
 
-		case errors.Is(err, internalErrors.ErrInsufficientBalance):
+		case errors.Is(err, service.ErrInsufficientBalance):
 			http.Error(w, err.Error(), http.StatusPaymentRequired)
 			return
 

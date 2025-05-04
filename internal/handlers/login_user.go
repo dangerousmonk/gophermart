@@ -6,8 +6,8 @@ import (
 	"log/slog"
 	"net/http"
 
-	internalErrors "github.com/dangerousmonk/gophermart/internal/errors"
 	"github.com/dangerousmonk/gophermart/internal/models"
+	"github.com/dangerousmonk/gophermart/internal/service"
 )
 
 func (h *HTTPHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
@@ -23,7 +23,7 @@ func (h *HTTPHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 		slog.Error("Error on login user", slog.Any("error", err))
 
 		switch {
-		case errors.Is(err, internalErrors.ErrWrongPassword) || errors.Is(err, internalErrors.ErrNoUserFound):
+		case errors.Is(err, service.ErrWrongPassword) || errors.Is(err, service.ErrNoUserFound):
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 

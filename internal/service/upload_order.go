@@ -6,7 +6,6 @@ import (
 	"errors"
 	"log/slog"
 
-	appErrors "github.com/dangerousmonk/gophermart/internal/errors"
 	"github.com/dangerousmonk/gophermart/internal/middleware"
 	"github.com/dangerousmonk/gophermart/internal/models"
 	"github.com/dangerousmonk/gophermart/internal/utils"
@@ -16,19 +15,19 @@ func (s *GophermartService) UploadOrder(ctx context.Context, orderNum string) (m
 	var newOrder models.Order
 	if !utils.IsValidOrderNumber(orderNum) {
 		slog.Error("UploadOrder not valid order number", slog.Any("error", orderNum))
-		return newOrder, appErrors.ErrWrongOrderNum
+		return newOrder, ErrWrongOrderNum
 	}
 
 	id := ctx.Value(middleware.UserIDContextKey)
 	if id == nil {
 		slog.Error("UploadOrder no userID in context", slog.Any("error", id))
-		return newOrder, appErrors.ErrNoUserIDFound
+		return newOrder, ErrNoUserIDFound
 	}
 
 	userID, ok := id.(int)
 	if !ok {
 		slog.Error("UploadOrder failed to cast userID", slog.Any("error", id))
-		return newOrder, appErrors.ErrNoUserIDFound
+		return newOrder, ErrNoUserIDFound
 	}
 
 	order, err := s.Repo.GetOrderByNumber(ctx, orderNum)
@@ -46,12 +45,12 @@ func (s *GophermartService) UploadOrder(ctx context.Context, orderNum string) (m
 		return newOrder, nil
 
 	case err == nil && order.UserID == userID:
-		return newOrder, appErrors.ErrOrderExists
+		return newOrder, ErrOrderExists
 
 	case err == nil && order.UserID != userID:
-		return newOrder, appErrors.ErrOrderExistsAnotherUser
+		return newOrder, ErrOrderExistsAnotherUser
 
 	default:
-		return newOrder, appErrors.ErrUnknown
+		return newOrder, ErrUnknown
 	}
 }

@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 
-	internalErrors "github.com/dangerousmonk/gophermart/internal/errors"
 	"github.com/dangerousmonk/gophermart/internal/models"
 	"github.com/dangerousmonk/gophermart/internal/utils"
 	"github.com/go-playground/validator/v10"
@@ -21,13 +20,13 @@ func (s *GophermartService) LoginUser(ctx context.Context, req *models.CreateUse
 	user, err = s.Repo.GetUser(ctx, req.Login)
 	if err != nil {
 		if s.Repo.IsNoRows(err) {
-			return user, internalErrors.ErrNoUserFound
+			return user, ErrNoUserFound
 		}
 		return user, err
 	}
 	err = utils.CheckPassword(req.Password, user.Password)
 	if err != nil {
-		return user, internalErrors.ErrWrongPassword
+		return user, ErrWrongPassword
 	}
 	return user, nil
 }
