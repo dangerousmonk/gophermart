@@ -3,6 +3,7 @@ package server
 import (
 	"log/slog"
 	"net/http"
+	"sync"
 
 	"github.com/dangerousmonk/gophermart/cmd/config"
 	"github.com/dangerousmonk/gophermart/internal/handlers"
@@ -24,13 +25,17 @@ func NewGophermartApp(cfg *config.Config, s *service.GophermartService) *Gopherm
 	}
 }
 
-func (app *GophermartApp) Start() error {
+func (app *GophermartApp) Start(wg *sync.WaitGroup) *http.Server {
 	r := app.initRouter()
-	err := http.ListenAndServe(app.Config.ServerAddr, r)
-	if err != nil {
-		return err
-	}
-	return nil
+	srv := &http.Server{Addr: app.Config.ServerAddr}
+	go func() {
+		defer wg.Done()
+
+		if err := http.ListenAndServe(app.Config.ServerAddr, r); err != http.ErrServerClosed {
+			slog.Error("Server failed initialize", slog.String("address", app.Config.ServerAddr))
+		}
+	}()
+	return srv
 }
 
 func (app *GophermartApp) initRouter() *chi.Mux {

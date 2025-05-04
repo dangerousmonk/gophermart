@@ -9,15 +9,17 @@ import (
 )
 
 const (
-	defaultServerAddr = "localhost:8080"
-	defaultJWTSecret  = "b6e2490a47c14cb7a1732aed3ba3f3c5"
+	defaultServerAddr      = "localhost:8080"
+	defaultJWTSecret       = "b6e2490a47c14cb7a1732aed3ba3f3c5"
+	defaultShutdownTimeout = 3
 )
 
 type Config struct {
-	ServerAddr  string
-	DatabaseDSN string
-	JWTSecret   string
-	AccrualAddr string
+	ServerAddr      string
+	DatabaseDSN     string
+	JWTSecret       string
+	AccrualAddr     string
+	ShutdownTimeout uint
 }
 
 func InitConfig() *Config {
@@ -54,5 +56,6 @@ func InitConfig() *Config {
 	}
 
 	cfg.JWTSecret = defaultJWTSecret
+	cfg.ShutdownTimeout = defaultShutdownTimeout
 	return cfg
 }
