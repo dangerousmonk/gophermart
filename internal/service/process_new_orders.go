@@ -39,9 +39,6 @@ func (s *GophermartService) ProccessPendingOrders(ctx context.Context, workerCou
 
 				if order.Status != resp.Status {
 					order.Status = resp.Status
-				}
-
-				if order.Accrual != resp.Accrual {
 					order.Accrual = resp.Accrual
 				}
 
