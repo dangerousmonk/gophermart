@@ -16,8 +16,7 @@ func (s *GophermartService) MakeWithdrawal(ctx context.Context, wdReq models.Mak
 	validate := validator.New(validator.WithRequiredStructEnabled())
 	err := validate.Struct(wdReq)
 	if err != nil {
-		errors := err.(validator.ValidationErrors)
-		return wd, errors
+		return wd, err
 	}
 
 	if !utils.IsValidOrderNumber(wdReq.Order) {

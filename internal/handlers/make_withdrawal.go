@@ -8,6 +8,7 @@ import (
 
 	"github.com/dangerousmonk/gophermart/internal/models"
 	"github.com/dangerousmonk/gophermart/internal/service"
+	"github.com/go-playground/validator/v10"
 )
 
 func (h *HTTPHandler) MakeWithdrawal(w http.ResponseWriter, r *http.Request) {
@@ -20,7 +21,13 @@ func (h *HTTPHandler) MakeWithdrawal(w http.ResponseWriter, r *http.Request) {
 	_, err := h.service.MakeWithdrawal(r.Context(), req)
 
 	if err != nil {
+		var validateErrs validator.ValidationErrors
+
 		switch {
+		case errors.As(err, &validateErrs):
+			WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+
 		case errors.Is(err, service.ErrWrongOrderNum):
 			WriteErrorResponse(w, http.StatusUnprocessableEntity, err.Error())
 			return

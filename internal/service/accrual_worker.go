@@ -13,7 +13,7 @@ func (s *GophermartService) StartAccrualWorker(ctx context.Context) {
 	for {
 		select {
 		case <-ticker.C:
-			s.ProccessPendingOrders(ctx, 5)
+			s.ProccessPendingOrders(ctx)
 		case <-ctx.Done():
 			slog.Info("Accrual worker finished")
 			return

@@ -8,7 +8,7 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-func (s *GophermartService) LoginUser(ctx context.Context, req *models.CreateUserReq) (models.User, error) {
+func (s *GophermartService) LoginUser(ctx context.Context, req *models.UserRequest) (models.User, error) {
 	var user models.User
 	validate := validator.New(validator.WithRequiredStructEnabled())
 	err := validate.Struct(req)

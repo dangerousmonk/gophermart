@@ -7,11 +7,12 @@ import (
 	"github.com/dangerousmonk/gophermart/internal/models"
 )
 
+//go:generate mockgen -package mocks -source types.go -destination ./mocks/mock_repository.go Repository
 type Repository interface {
 	// Ping checks whether internal storage is up and running
 	Ping(ctx context.Context) error
 	// CreateUser creates new User
-	CreateUser(ctx context.Context, u *models.CreateUserReq) (int, error)
+	CreateUser(ctx context.Context, u *models.UserRequest) (int, error)
 	// GetUser searches user by login
 	GetUser(ctx context.Context, login string) (models.User, error)
 	// GetOrderByNumber searches order by order number

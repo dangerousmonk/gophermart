@@ -7,7 +7,7 @@ import (
 	"github.com/dangerousmonk/gophermart/internal/models"
 )
 
-func (r *PostgresRepo) CreateUser(ctx context.Context, u *models.CreateUserReq) (int, error) {
+func (r *PostgresRepo) CreateUser(ctx context.Context, u *models.UserRequest) (int, error) {
 	var userID int
 	ctx, cancel := context.WithTimeout(ctx, time.Second*2)
 	defer cancel()

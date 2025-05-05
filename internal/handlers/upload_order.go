@@ -19,6 +19,10 @@ func (h *HTTPHandler) UploadOrder(w http.ResponseWriter, r *http.Request) {
 	}
 
 	orderNum := strings.TrimSpace(string(body))
+	if orderNum == "" {
+		WriteErrorResponse(w, http.StatusBadRequest, "Missing order number")
+		return
+	}
 	_, err = h.service.UploadOrder(r.Context(), orderNum)
 
 	if err != nil {

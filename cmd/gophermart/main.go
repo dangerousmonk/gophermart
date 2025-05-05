@@ -53,6 +53,6 @@ func main() {
 	defer cancel()
 
 	if err := srv.Shutdown(ctx); err != nil {
-		logger.Error("Server start failed", slog.Any("err", err))
+		logger.Error("Server shutdown failed", slog.Any("err", err))
 	}
 }

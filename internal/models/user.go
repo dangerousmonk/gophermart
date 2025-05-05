@@ -14,7 +14,7 @@ type User struct {
 	Active      bool      `json:"active"`
 }
 
-type CreateUserReq struct {
+type UserRequest struct {
 	Login          string `json:"login" validate:"required,min=3,max=150"`
 	Password       string `json:"password" validate:"required,min=5"`
 	HashedPassword string `json:"-"`

@@ -8,7 +8,7 @@ import (
 	"github.com/dangerousmonk/gophermart/internal/models"
 )
 
-func (s *GophermartService) ProccessPendingOrders(ctx context.Context, workerCount int) {
+func (s *GophermartService) ProccessPendingOrders(ctx context.Context) {
 	orders, err := s.Repo.GetNewOrders(ctx)
 	if err != nil {
 		slog.Error("ProccessPendingOrders error on fetching orders from DB", slog.Any("error", err))
@@ -21,7 +21,7 @@ func (s *GophermartService) ProccessPendingOrders(ctx context.Context, workerCou
 	var wg sync.WaitGroup
 	jobs := make(chan models.Order, len(orders))
 
-	for i := 0; i < workerCount; i++ {
+	for i := 0; i < int(s.Cfg.WorkersNumber); i++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()

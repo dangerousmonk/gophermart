@@ -8,10 +8,11 @@ import (
 
 	"github.com/dangerousmonk/gophermart/internal/models"
 	"github.com/dangerousmonk/gophermart/internal/service"
+	"github.com/go-playground/validator/v10"
 )
 
 func (h *HTTPHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
-	var req models.CreateUserReq
+	var req models.UserRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		slog.Error("LoginUser error on decoding body", slog.Any("err", err))
 		WriteErrorResponse(w, http.StatusBadRequest, err.Error())
@@ -21,10 +22,15 @@ func (h *HTTPHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 	user, err := h.service.LoginUser(r.Context(), &req)
 	if err != nil {
 		slog.Error("Error on login user", slog.Any("error", err))
+		var validateErrs validator.ValidationErrors
 
 		switch {
 		case errors.Is(err, service.ErrWrongPassword) || errors.Is(err, service.ErrNoUserFound):
 			WriteErrorResponse(w, http.StatusUnauthorized, err.Error())
+			return
+
+		case errors.As(err, &validateErrs):
+			WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
 
 		default:

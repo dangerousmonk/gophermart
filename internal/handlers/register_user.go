@@ -12,7 +12,7 @@ import (
 )
 
 func (h *HTTPHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
-	var req models.CreateUserReq
+	var req models.UserRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		slog.Error("RegisterUser error on decoding body", slog.Any("error", err))
 		WriteErrorResponse(w, http.StatusBadRequest, err.Error())

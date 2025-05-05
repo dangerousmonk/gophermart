@@ -12,6 +12,7 @@ const (
 	defaultServerAddr      = "localhost:8080"
 	defaultJWTSecret       = "b6e2490a47c14cb7a1732aed3ba3f3c5"
 	defaultShutdownTimeout = 3
+	defaultWorkersNumber   = 5
 )
 
 type Config struct {
@@ -20,6 +21,7 @@ type Config struct {
 	JWTSecret       string
 	AccrualAddr     string
 	ShutdownTimeout uint
+	WorkersNumber   uint
 }
 
 func InitConfig() *Config {
@@ -57,5 +59,6 @@ func InitConfig() *Config {
 
 	cfg.JWTSecret = defaultJWTSecret
 	cfg.ShutdownTimeout = defaultShutdownTimeout
+	cfg.WorkersNumber = defaultWorkersNumber
 	return cfg
 }
