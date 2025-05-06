@@ -11,6 +11,17 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
+// MakeWithdrawal godoc
+//
+//	@Summary		Make withdrawal
+//	@Description	Make withdrawal
+//	@Accept			json
+//	@Produce		json
+//	@Tags			withdrawals
+//	@Param			data	body		models.MakeWithdrawalReq	true	"Request body"
+//	@Success		200
+//	@Failure		400,401,402,409,422,500	{object}	errorResponse
+//	@Router			/api/user/balance/withdraw   [post]
 func (h *HTTPHandler) MakeWithdrawal(w http.ResponseWriter, r *http.Request) {
 	var req models.MakeWithdrawalReq
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {

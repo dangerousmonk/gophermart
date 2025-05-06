@@ -11,6 +11,17 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
+// RegisterUser godoc
+//
+//	@Summary		Register user
+//	@Description	Register user
+//	@Accept			json
+//	@Produce		json
+//	@Tags			users
+//	@Param			data	body		models.UserRequest	true	"Request body"
+//	@Success		200
+//	@Failure		400,409,500	{object}	errorResponse
+//	@Router			/api/user/register   [post]
 func (h *HTTPHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	var req models.UserRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {

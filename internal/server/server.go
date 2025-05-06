@@ -6,12 +6,14 @@ import (
 	"sync"
 
 	"github.com/dangerousmonk/gophermart/cmd/config"
+	_ "github.com/dangerousmonk/gophermart/docs"
 	"github.com/dangerousmonk/gophermart/internal/handlers"
 	appmdwlr "github.com/dangerousmonk/gophermart/internal/middleware"
 	"github.com/dangerousmonk/gophermart/internal/service"
 	"github.com/dangerousmonk/gophermart/internal/utils"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 type GophermartApp struct {
@@ -26,6 +28,16 @@ func NewGophermartApp(cfg *config.Config, s *service.GophermartService) *Gopherm
 	}
 }
 
+// Start godoc
+//
+//	@title						Gophermart service
+//	@version					1.0
+//	@description				API Server
+//	@BasePath					/
+//
+//	@securityDefinitions.apikey	ApiKeyAuth
+//	@in							Cookie
+//	@name						auth
 func (app *GophermartApp) Start(wg *sync.WaitGroup) *http.Server {
 	r := app.initRouter()
 	srv := &http.Server{Addr: app.Config.ServerAddr}
@@ -51,6 +63,10 @@ func (app *GophermartApp) initRouter() *chi.Mux {
 	r.Use(appmdwlr.RequestSlogger)
 
 	// handlers
+	r.Get("/swagger/*", httpSwagger.Handler(
+		httpSwagger.URL("http://localhost:8099/swagger/doc.json"),
+	))
+
 	httpHandler := handlers.NewHandler(*app.Service, jwtAuthenticator)
 	r.Get("/ping", httpHandler.Ping)
 	r.Post("/api/user/register", httpHandler.RegisterUser)

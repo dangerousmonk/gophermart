@@ -10,6 +10,18 @@ import (
 	"github.com/dangerousmonk/gophermart/internal/service"
 )
 
+// UploadOrder godoc
+//
+//	@Summary		Upload order
+//	@Description	Upload order
+//	@Accept			plain
+//	@Produce		json
+//	@Tags			orders
+//	@Param			order_number	body string	true	"Request body"
+//	@Success		200
+//	@Success		202
+//	@Failure		400,401,409,422,500	{object}	errorResponse
+//	@Router			/api/user/orders   [post]
 func (h *HTTPHandler) UploadOrder(w http.ResponseWriter, r *http.Request) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {

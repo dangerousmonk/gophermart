@@ -9,6 +9,20 @@ import (
 	"github.com/dangerousmonk/gophermart/internal/service"
 )
 
+// GetWithdrawals godoc
+//
+//	@Summary		Get withdrawals
+//	@Description	Get user withdrawals
+//	@Accept			json
+//
+// @Param 		 Cookie header string  true "auth"     default(auth=xxx)
+//
+//	@Produce		json
+//	@Tags			withdrawals
+//	@Success		200 {object} models.Withdrawal
+//	@Success		204
+//	@Failure		401,500	{object}	errorResponse
+//	@Router			/api/user/withdrawals   [get]
 func (h *HTTPHandler) GetUserWithdrawals(w http.ResponseWriter, r *http.Request) {
 	wds, err := h.service.GetUserWithdrawals(r.Context())
 
