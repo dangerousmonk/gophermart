@@ -8,6 +8,7 @@ import (
 
 	"github.com/dangerousmonk/gophermart/internal/models"
 	"github.com/dangerousmonk/gophermart/internal/service"
+	"github.com/dangerousmonk/gophermart/internal/utils"
 	"github.com/go-playground/validator/v10"
 )
 
@@ -45,14 +46,14 @@ func (h *HTTPHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 			return
 
 		default:
-			WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
+			WriteErrorResponse(w, http.StatusInternalServerError, utils.SanitizeError(err))
 			return
 		}
 	}
 	err = h.authenticator.SetAuth(userID, w, r)
 	if err != nil {
-		slog.Error("RegisterUser error on setting cookies", slog.Any("error", err))
-		WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
+		slog.Error("RegisterUser error on setting cookies", slog.Any("error", utils.SanitizeError(err)))
+		WriteErrorResponse(w, http.StatusInternalServerError, "Failed to register user")
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")

@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/dangerousmonk/gophermart/internal/middleware"
 	"github.com/dangerousmonk/gophermart/internal/models"
 	"github.com/dangerousmonk/gophermart/internal/service"
 	"github.com/go-playground/validator/v10"
@@ -29,7 +30,15 @@ func (h *HTTPHandler) MakeWithdrawal(w http.ResponseWriter, r *http.Request) {
 		WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	_, err := h.service.MakeWithdrawal(r.Context(), req)
+
+	userID, ok := r.Context().Value(middleware.UserIDContextKey).(int)
+	if !ok {
+		slog.Error("MakeWithdrawal failed to cast userID", slog.Any("userID", userID))
+		WriteErrorResponse(w, http.StatusUnauthorized, "No valid userID found")
+		return
+	}
+
+	_, err := h.service.MakeWithdrawal(r.Context(), userID, req)
 
 	if err != nil {
 		var validateErrs validator.ValidationErrors
@@ -42,9 +51,6 @@ func (h *HTTPHandler) MakeWithdrawal(w http.ResponseWriter, r *http.Request) {
 		case errors.Is(err, service.ErrWrongOrderNum):
 			WriteErrorResponse(w, http.StatusUnprocessableEntity, err.Error())
 			return
-		case errors.Is(err, service.ErrNoUserIDFound):
-			WriteErrorResponse(w, http.StatusUnauthorized, err.Error())
-			return
 
 		case errors.Is(err, service.ErrWithdrawalForOrderExists):
 			WriteErrorResponse(w, http.StatusConflict, err.Error())
@@ -55,7 +61,7 @@ func (h *HTTPHandler) MakeWithdrawal(w http.ResponseWriter, r *http.Request) {
 			return
 
 		default:
-			slog.Error("CreateWithdrawal error", slog.Any("error", err))
+			slog.Error("CreateWithdrawal error", slog.Any("error", err), slog.Int("userID", userID))
 			WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
 		}

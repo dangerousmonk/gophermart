@@ -4,13 +4,12 @@ import (
 	"context"
 	"log/slog"
 
-	"github.com/dangerousmonk/gophermart/internal/middleware"
 	"github.com/dangerousmonk/gophermart/internal/models"
 	"github.com/dangerousmonk/gophermart/internal/utils"
 	"github.com/go-playground/validator/v10"
 )
 
-func (s *GophermartService) MakeWithdrawal(ctx context.Context, wdReq models.MakeWithdrawalReq) (models.Withdrawal, error) {
+func (s *GophermartService) MakeWithdrawal(ctx context.Context, userID int, wdReq models.MakeWithdrawalReq) (models.Withdrawal, error) {
 	var wd models.Withdrawal
 
 	validate := validator.New(validator.WithRequiredStructEnabled())
@@ -24,25 +23,13 @@ func (s *GophermartService) MakeWithdrawal(ctx context.Context, wdReq models.Mak
 		return wd, ErrWrongOrderNum
 	}
 
-	id := ctx.Value(middleware.UserIDContextKey)
-	if id == nil {
-		slog.Error("CreateWithdrawal no userID in context", slog.Any("error", id))
-		return wd, ErrNoUserIDFound
-	}
-
-	userID, ok := id.(int)
-	if !ok {
-		slog.Error("CreateWithdrawal failed to cast userID", slog.Any("error", id))
-		return wd, ErrNoUserIDFound
-	}
-
 	balance, err := s.Repo.GetBalance(ctx, userID)
 	if err != nil {
-		slog.Error("CreateWithdrawal failed to check balance", slog.Any("error", id))
+		slog.Error("CreateWithdrawal failed to check balance", slog.Any("error", err))
 		return wd, err
 	}
 	if balance.Current < wdReq.Sum {
-		slog.Error("CreateWithdrawal insufficient funds", slog.Any("error", id))
+		slog.Error("CreateWithdrawal insufficient funds", slog.Any("error", userID))
 		return wd, ErrInsufficientBalance
 	}
 

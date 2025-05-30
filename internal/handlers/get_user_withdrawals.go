@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/dangerousmonk/gophermart/internal/middleware"
 	"github.com/dangerousmonk/gophermart/internal/service"
 )
 
@@ -24,7 +25,14 @@ import (
 //	@Failure		401,500	{object}	errorResponse
 //	@Router			/api/user/withdrawals   [get]
 func (h *HTTPHandler) GetUserWithdrawals(w http.ResponseWriter, r *http.Request) {
-	wds, err := h.service.GetUserWithdrawals(r.Context())
+	userID, ok := r.Context().Value(middleware.UserIDContextKey).(int)
+	if !ok {
+		slog.Error("GetUserWithdrawals failed to cast userID", slog.Any("userID", userID))
+		WriteErrorResponse(w, http.StatusUnauthorized, "No valid userID found")
+		return
+	}
+
+	wds, err := h.service.GetUserWithdrawals(r.Context(), userID)
 
 	if err != nil {
 		switch {
@@ -33,14 +41,8 @@ func (h *HTTPHandler) GetUserWithdrawals(w http.ResponseWriter, r *http.Request)
 			w.WriteHeader(http.StatusNoContent)
 			return
 
-		case errors.Is(err, service.ErrNoUserIDFound):
-			http.Error(w, "User ID not found", http.StatusUnauthorized)
-			WriteErrorResponse(w, http.StatusUnauthorized, err.Error())
-			return
-
 		default:
-			slog.Error("GetUserWithdrawals error", slog.Any("error", err))
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			slog.Error("GetUserWithdrawals error", slog.Any("error", err), slog.Int("userID", userID))
 			WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
 		}

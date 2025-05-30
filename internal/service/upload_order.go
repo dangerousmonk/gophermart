@@ -6,28 +6,15 @@ import (
 	"errors"
 	"log/slog"
 
-	"github.com/dangerousmonk/gophermart/internal/middleware"
 	"github.com/dangerousmonk/gophermart/internal/models"
 	"github.com/dangerousmonk/gophermart/internal/utils"
 )
 
-func (s *GophermartService) UploadOrder(ctx context.Context, orderNum string) (models.Order, error) {
+func (s *GophermartService) UploadOrder(ctx context.Context, userID int, orderNum string) (models.Order, error) {
 	var newOrder models.Order
 	if !utils.IsValidOrderNumber(orderNum) {
 		slog.Error("UploadOrder not valid order number", slog.Any("error", orderNum))
 		return newOrder, ErrWrongOrderNum
-	}
-
-	id := ctx.Value(middleware.UserIDContextKey)
-	if id == nil {
-		slog.Error("UploadOrder no userID in context", slog.Any("error", id))
-		return newOrder, ErrNoUserIDFound
-	}
-
-	userID, ok := id.(int)
-	if !ok {
-		slog.Error("UploadOrder failed to cast userID", slog.Any("error", id))
-		return newOrder, ErrNoUserIDFound
 	}
 
 	order, err := s.Repo.GetOrderByNumber(ctx, orderNum)

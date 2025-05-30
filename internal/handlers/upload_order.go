@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/dangerousmonk/gophermart/internal/middleware"
 	"github.com/dangerousmonk/gophermart/internal/service"
 )
 
@@ -30,20 +31,24 @@ func (h *HTTPHandler) UploadOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	userID, ok := r.Context().Value(middleware.UserIDContextKey).(int)
+	if !ok {
+		slog.Error("UploadOrder failed to cast userID", slog.Any("userID", userID))
+		WriteErrorResponse(w, http.StatusUnauthorized, "No valid userID found")
+		return
+	}
+
 	orderNum := strings.TrimSpace(string(body))
 	if orderNum == "" {
 		WriteErrorResponse(w, http.StatusBadRequest, "Missing order number")
 		return
 	}
-	_, err = h.service.UploadOrder(r.Context(), orderNum)
+	_, err = h.service.UploadOrder(r.Context(), userID, orderNum)
 
 	if err != nil {
 		switch {
 		case errors.Is(err, service.ErrWrongOrderNum):
 			WriteErrorResponse(w, http.StatusUnprocessableEntity, err.Error())
-			return
-		case errors.Is(err, service.ErrNoUserIDFound):
-			WriteErrorResponse(w, http.StatusUnauthorized, err.Error())
 			return
 
 		case errors.Is(err, service.ErrOrderExists):
@@ -56,7 +61,7 @@ func (h *HTTPHandler) UploadOrder(w http.ResponseWriter, r *http.Request) {
 			return
 
 		default:
-			slog.Error("UploadOrder error", slog.Any("error", err))
+			slog.Error("UploadOrder error", slog.Any("error", err), slog.Int("userID", userID))
 			WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
 		}

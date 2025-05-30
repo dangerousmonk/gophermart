@@ -23,7 +23,7 @@ func (r *PostgresRepo) GetBalance(ctx context.Context, userID int) (models.UserB
 		return ub, nil
 	}
 	if err == sql.ErrNoRows {
-		return ub, err
+		return models.UserBalance{}, err
 	}
-	return ub, err
+	return models.UserBalance{}, err
 }

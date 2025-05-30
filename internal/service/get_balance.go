@@ -4,28 +4,14 @@ import (
 	"context"
 	"log/slog"
 
-	"github.com/dangerousmonk/gophermart/internal/middleware"
 	"github.com/dangerousmonk/gophermart/internal/models"
 )
 
-func (s *GophermartService) GetBalance(ctx context.Context) (models.UserBalance, error) {
-	var ub models.UserBalance
-	id := ctx.Value(middleware.UserIDContextKey)
-	if id == nil {
-		slog.Error("GetBalance no userID in context", slog.Any("error", id))
-		return ub, ErrNoUserIDFound
-	}
-
-	userID, ok := id.(int)
-	if !ok {
-		slog.Error("GetBalance failed to cast userID", slog.Any("error", id))
-		return ub, ErrNoUserIDFound
-	}
-
+func (s *GophermartService) GetBalance(ctx context.Context, userID int) (models.UserBalance, error) {
 	ub, err := s.Repo.GetBalance(ctx, userID)
 	if err != nil {
-		slog.Error("GetBalance failed to fetch balance", slog.Any("error", id))
-		return ub, err
+		slog.Error("GetBalance failed to fetch balance", slog.Any("error", err))
+		return models.UserBalance{}, err
 	}
 	return ub, nil
 }

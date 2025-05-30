@@ -1,7 +1,9 @@
+CREATE TYPE order_status_enum AS ENUM ('NEW', 'REGISTERED', 'INVALID', 'PROCESSING', 'PROCESSED');
+
 CREATE TABLE IF NOT EXISTS orders (
   id  BIGSERIAL PRIMARY KEY,
   number VARCHAR(150) UNIQUE NOT NULL,
-  status VARCHAR(50) NOT NULL,
+  status order_status_enum NOT NULL DEFAULT 'NEW',
   user_id BIGINT REFERENCES users(id)  NOT NULL,
   accrual NUMERIC(15,2) DEFAULT 0 CHECK(accrual >= 0),
   active BOOLEAN NOT NULL DEFAULT TRUE,

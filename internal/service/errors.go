@@ -4,7 +4,6 @@ import "errors"
 
 var (
 	//user
-	ErrNoUserIDFound = errors.New("user: failed to resolve userID")
 	ErrLoginExists   = errors.New("user: user with this login already exists")
 	ErrWrongPassword = errors.New("user: password is wrong")
 	ErrNoUserFound   = errors.New("user: user not found by login")

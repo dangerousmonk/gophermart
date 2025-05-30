@@ -23,9 +23,9 @@ func (r *PostgresRepo) GetOrderByNumber(ctx context.Context, orderNum string) (m
 		return ord, nil
 	}
 	if err == sql.ErrNoRows {
-		return ord, err
+		return models.Order{}, err
 	}
-	return ord, err
+	return models.Order{}, err
 }
 
 func (r *PostgresRepo) GetUserOrders(ctx context.Context, userID int) ([]models.Order, error) {

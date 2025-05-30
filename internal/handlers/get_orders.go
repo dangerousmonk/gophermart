@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/dangerousmonk/gophermart/internal/middleware"
 	"github.com/dangerousmonk/gophermart/internal/service"
 )
 
@@ -23,7 +24,13 @@ import (
 //	@Failure		401,500	{object}	errorResponse
 //	@Router			/api/user/orders   [get]
 func (h *HTTPHandler) GetUserOrders(w http.ResponseWriter, r *http.Request) {
-	orders, err := h.service.GetUserOrders(r.Context())
+	userID, ok := r.Context().Value(middleware.UserIDContextKey).(int)
+	if !ok {
+		slog.Error("GetUserOrders failed to cast userID", slog.Any("userID", userID))
+		WriteErrorResponse(w, http.StatusUnauthorized, "No valid userID found")
+		return
+	}
+	orders, err := h.service.GetUserOrders(r.Context(), userID)
 
 	if err != nil {
 		switch {
@@ -32,24 +39,18 @@ func (h *HTTPHandler) GetUserOrders(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusNoContent)
 			return
 
-		case errors.Is(err, service.ErrNoUserIDFound):
-			slog.Error("GetUserOrders user ID not resolved", slog.Any("error", err))
-			WriteErrorResponse(w, http.StatusUnauthorized, err.Error())
-			return
-
 		default:
-			slog.Error("GetUserOrders error", slog.Any("error", err))
+			slog.Error("GetUserOrders error", slog.Any("error", err), slog.Int("userID", userID))
 			WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
 		}
-	} else {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(orders); err != nil {
-			slog.Error("GetUserOrders error on encoding response", slog.Any("error", err))
-			WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
-			return
-		}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(orders); err != nil {
+		slog.Error("GetUserOrders error on encoding response", slog.Any("error", err), slog.Int("userID", userID))
+		WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
