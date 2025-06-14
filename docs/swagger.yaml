@@ -1,0 +1,371 @@
+basePath: /
+definitions:
+  handlers.errorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  models.MakeWithdrawalReq:
+    properties:
+      order:
+        minLength: 3
+        type: string
+      sum:
+        type: number
+    required:
+    - order
+    - sum
+    type: object
+  models.Order:
+    properties:
+      accrual:
+        type: number
+      active:
+        type: boolean
+      created_at:
+        type: string
+      id:
+        type: integer
+      modified_at:
+        type: string
+      number:
+        type: string
+      status:
+        $ref: '#/definitions/models.OrderStatus'
+      user_id:
+        type: integer
+    type: object
+  models.OrderStatus:
+    enum:
+    - NEW
+    - REGISTERED
+    - INVALID
+    - PROCESSING
+    - PROCESSED
+    type: string
+    x-enum-varnames:
+    - StatusNew
+    - StatusRegistered
+    - StatusInvalid
+    - StatusProcessing
+    - StatusProcessed
+  models.User:
+    properties:
+      active:
+        type: boolean
+      created_at:
+        type: string
+      id:
+        type: integer
+      last_login_at:
+        type: string
+      login:
+        type: string
+      modified_at:
+        type: string
+    type: object
+  models.UserBalance:
+    properties:
+      created_at:
+        type: string
+      current:
+        type: number
+      id:
+        type: integer
+      user_id:
+        type: integer
+      withdrawn:
+        type: number
+    type: object
+  models.UserRequest:
+    properties:
+      login:
+        maxLength: 150
+        minLength: 3
+        type: string
+      password:
+        minLength: 5
+        type: string
+    required:
+    - login
+    - password
+    type: object
+  models.Withdrawal:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      order:
+        type: string
+      sum:
+        type: number
+      user_id:
+        type: integer
+    type: object
+info:
+  contact: {}
+  description: API Server
+  title: Gophermart service
+  version: "1.0"
+paths:
+  /api/user/balance:
+    get:
+      consumes:
+      - application/json
+      description: Get user balance
+      parameters:
+      - default: auth=xxx
+        description: auth
+        in: header
+        name: Cookie
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.UserBalance'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+      summary: User balance
+      tags:
+      - balance
+  /api/user/balance/withdraw:
+    post:
+      consumes:
+      - application/json
+      description: Make withdrawal
+      parameters:
+      - description: Request body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.MakeWithdrawalReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "402":
+          description: Payment Required
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+      summary: Make withdrawal
+      tags:
+      - withdrawals
+  /api/user/login:
+    post:
+      consumes:
+      - application/json
+      description: Login user
+      parameters:
+      - description: Request body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+      summary: Login user
+      tags:
+      - users
+  /api/user/orders:
+    get:
+      consumes:
+      - application/json
+      description: Get user orders
+      parameters:
+      - default: auth=xxx
+        description: auth
+        in: header
+        name: Cookie
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Order'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+      summary: Get orders
+      tags:
+      - orders
+    post:
+      consumes:
+      - text/plain
+      description: Upload order
+      parameters:
+      - description: Request body
+        in: body
+        name: order_number
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "202":
+          description: Accepted
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+      summary: Upload order
+      tags:
+      - orders
+  /api/user/register:
+    post:
+      consumes:
+      - application/json
+      description: Register user
+      parameters:
+      - description: Request body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+      summary: Register user
+      tags:
+      - users
+  /api/user/withdrawals:
+    get:
+      consumes:
+      - application/json
+      description: Get user withdrawals
+      parameters:
+      - default: auth=xxx
+        description: auth
+        in: header
+        name: Cookie
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Withdrawal'
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+      summary: Get withdrawals
+      tags:
+      - withdrawals
+  /ping:
+    get:
+      description: Checks if DB is alive
+      responses:
+        "200":
+          description: OK
+        "500":
+          description: Internal Server Error
+      summary: DB Healthcheck
+      tags:
+      - Ping
+securityDefinitions:
+  ApiKeyAuth:
+    in: Cookie
+    name: auth
+    type: apiKey
+swagger: "2.0"
